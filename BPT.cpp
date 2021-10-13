@@ -1,0 +1,146 @@
+#include "BPT.h"
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <iterator>
+
+BPTree::BPTree() {}
+
+BPTree::BPTree(int order) {
+    this->order = order;
+    degree = this->order / 2;
+}
+
+void BPTree::insert(int value) {
+    std::stack<Node*> ancestors;
+    Node* copy = root;
+    int current_depth = depth;
+
+    for(int i = 0; i <= current_depth; ++i) {
+        if(i == current_depth) {
+            copy->values.push_back(value);
+            std::sort(copy->values.begin(), copy->values.end());
+            if(copy->values.size() > order) { split(copy, ancestors, true); }
+        } else {
+            if(copy->values.size() > 0) {
+                ancestors.push(copy);
+                for(int j = copy->values.size() - 1; j >= 0 ; --j) {
+                    if(value > copy->values[j]) { copy = copy->children[j+1]; }
+                }
+                if(value < copy->values[0]) { copy = copy->children[0]; }
+            }
+        }
+    }
+}
+
+/** Removes a value from B+ Tree
+ * @param value: value to be removed
+ * @return bool: true is value is removed, false otherwise
+*/
+bool BPTree::remove(int value) {
+    switch(depth) {
+        case 0:
+            if(root->values.size() != 0) {
+                for(int i = 0; i < root->values.size(); ++i) {
+                    if(value == root->values[i]) {
+                        root->values.erase(root->values.begin()+i);
+                        return 1;
+                    }
+                }
+            }
+
+            break;
+        default:
+            break;
+    }
+
+    return 0;
+}
+
+bool BPTree::exists(int value) {
+    Node* node = root;
+    
+    for(int i = 0; i <= depth; ++i) {
+        if(i != depth) {
+            if(value > node->values[node->values.size() - 1]) { node = node->children[node->values.size()]; }
+            else {
+                for(int j = node->values.size(); j >= 0; --j) {
+                    if(value <= node->values[j]) {
+                        node = node->children[j];
+                    }
+                }
+            }
+        } else {
+            return std::find(node->values.begin(), node->values.end(), value) != node->values.end();
+        }
+    }
+
+    return 0;
+}
+
+int BPTree::get_order() { return order; }
+void BPTree::set_order(int new_order) { order = new_order;}
+
+void BPTree::print() {
+    std::queue<Node*> nodes;
+    nodes.push(root);
+    while(!nodes.empty()) {
+        Node* current_node = nodes.front();
+        nodes.pop();
+
+        for(int i = 0; i < current_node->children.size(); ++i) {
+            nodes.push(current_node->children[i]);
+        }
+
+        for(int i = 0; i < current_node->values.size(); ++i) {
+            std::cout << current_node->values[i] << ' ';
+        }
+        std::cout << '\n';
+    }
+}
+
+void BPTree::split(Node* node, std::stack<Node*> ancestors, bool leaf) {
+    Node* parent = nullptr;
+    if(!ancestors.empty()) {
+        parent = ancestors.top();
+        ancestors.pop();
+    }
+
+    Node* new_node = new Node();
+    std::vector<int> split_one (node->values.begin(), node->values.begin() + (node->values.size() / 2));
+    std::vector<int> split_two (node->values.begin() + (node->values.size() / 2), node->values.end());
+    node->values = split_one;
+    new_node->values = split_two;
+
+    if(!leaf) {
+        std::vector<Node*> split_one_c (node->children.begin(), node->children.begin() + (node->children.size() / 2));
+        std::vector<Node*> split_two_c (node->children.begin() + (node->children.size() / 2), node->children.end());
+        node->children = split_one_c;
+        new_node->children = split_two_c;
+    }
+
+    if(!parent) {
+        parent = new Node();
+        parent->values.push_back(split_two[0]);
+        parent->children.insert(parent->children.end(), {node, new_node});
+        root = parent;
+        ++depth;
+    } else {
+        std::vector<int>::iterator it;
+        it = (leaf) ? std::find(parent->values.begin(), parent->values.end(), node->values[0])
+                    : std::lower_bound(parent->values.begin(), parent->values.end(), new_node->values[1]);
+        if(it != parent->values.end()) {
+            int position = std::distance(parent->values.begin(), it) + 1;
+            parent->values.insert(parent->values.begin() + position, new_node->values[0]);
+            parent->children.insert(parent->children.begin() + position + 1, new_node);
+        } else {
+            parent->values.insert(parent->values.begin(), new_node->values[0]);
+            parent->children[0] = new_node;
+            parent->children.insert(parent->children.begin(), node);
+        }
+    }
+
+    if(parent->values.size() > order) { split(parent, ancestors, true); }
+}
