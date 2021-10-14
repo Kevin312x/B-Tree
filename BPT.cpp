@@ -22,7 +22,7 @@ void BPTree::insert(int value) {
         if(i == current_depth) {
             copy->values.push_back(value);
             std::sort(copy->values.begin(), copy->values.end());
-            if(copy->values.size() > order) { split(copy, ancestors, true); }
+            if(copy->values.size() > order) { split(copy, ancestors, true); ++depth; }
         } else {
             if(copy->values.size() > 0) {
                 ancestors.push(copy);
