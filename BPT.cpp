@@ -22,7 +22,7 @@ void BPTree::insert(int value) {
         if(i == current_depth) {
             copy->values.push_back(value);
             std::sort(copy->values.begin(), copy->values.end());
-            if(copy->values.size() > order) { split(copy, ancestors, true); ++depth; }
+            if(copy->values.size() > order) { split(copy, ancestors, true); }
         } else {
             if(copy->values.size() > 0) {
                 ancestors.push(copy);
@@ -61,7 +61,7 @@ bool BPTree::remove(int value) {
 
 bool BPTree::exists(int value) {
     Node* node = root;
-    
+
     for(int i = 0; i <= depth; ++i) {
         if(i != depth) {
             if(value > node->values[node->values.size() - 1]) { node = node->children[node->values.size()]; }
@@ -113,6 +113,7 @@ void BPTree::split(Node* node, std::stack<Node*> ancestors, bool leaf) {
     std::vector<int> split_two (node->values.begin() + (node->values.size() / 2), node->values.end());
     node->values = split_one;
     new_node->values = split_two;
+    if(!leaf) { new_node->values.erase(new_node->values.begin()); }
 
     if(!leaf) {
         std::vector<Node*> split_one_c (node->children.begin(), node->children.begin() + (node->children.size() / 2));
@@ -142,5 +143,5 @@ void BPTree::split(Node* node, std::stack<Node*> ancestors, bool leaf) {
         }
     }
 
-    if(parent->values.size() > order) { split(parent, ancestors, true); }
+    if(parent->values.size() > order) { split(parent, ancestors, false); }
 }
