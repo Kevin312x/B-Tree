@@ -22,7 +22,7 @@ void BPTree::insert(int value) {
         if(i == current_depth) {
             copy->values.push_back(value);
             std::sort(copy->values.begin(), copy->values.end());
-            if(copy->values.size() > order) { split(copy, ancestors, true); }
+            if(copy->values.size() > (order - 1)) { split(copy, ancestors, true); }
         } else {
             if(copy->values.size() > 0) {
                 ancestors.push(copy);
@@ -81,7 +81,7 @@ bool BPTree::exists(int value) {
 }
 
 int BPTree::get_order() { return order; }
-void BPTree::set_order(int new_order) { order = new_order;}
+void BPTree::set_order(int new_order) { order = new_order; degree = new_order / 2; }
 
 void BPTree::print() {
     std::queue<Node*> nodes;
@@ -143,5 +143,5 @@ void BPTree::split(Node* node, std::stack<Node*> ancestors, bool leaf) {
         }
     }
 
-    if(parent->values.size() > order) { split(parent, ancestors, false); }
+    if(parent->values.size() > order - 1) { split(parent, ancestors, false); }
 }
