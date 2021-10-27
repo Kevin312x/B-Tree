@@ -13,6 +13,10 @@ BPTree::BPTree(int order) {
     degree = this->order / 2;
 }
 
+/** Inserts value into B+ Tree
+ * @param value: value to be inserted
+ * @return: none
+*/
 void BPTree::insert(int value) {
     std::stack<Node*> ancestors;
     Node* copy = root;
@@ -59,6 +63,10 @@ bool BPTree::remove(int value) {
     return 0;
 }
 
+/** Checks if value exists in B+ Tree
+ * @param value: value to be checked
+ * @return bool: true is value exists, false if not
+*/
 bool BPTree::exists(int value) {
     Node* node = root;
 
@@ -80,9 +88,22 @@ bool BPTree::exists(int value) {
     return 0;
 }
 
+/** Returns the order of the B+ Tree
+ * @param: none
+ * @return order: order of the tree
+*/
 int BPTree::get_order() { return order; }
+
+/** Set order of the tree
+ * @param new_order: new order of the B+ Tree
+ * @return: none
+*/
 void BPTree::set_order(int new_order) { order = new_order; degree = new_order / 2; }
 
+/** Prints out the B+ Tree in Breadth First order
+ * @param: none
+ * @return: none
+*/
 void BPTree::print() {
     std::queue<Node*> nodes;
     nodes.push(root);
@@ -101,6 +122,11 @@ void BPTree::print() {
     }
 }
 
+/** Splits node into two if node's values are greater than order
+ * @param node: Node containing the array of values and children to be split
+ * @param ancestors: stack containing all the ancestors of the node
+ * @param leaf: bool depending if the node is a leaf node or not
+*/
 void BPTree::split(Node* node, std::stack<Node*> ancestors, bool leaf) {
     Node* parent = nullptr;
     if(!ancestors.empty()) {
