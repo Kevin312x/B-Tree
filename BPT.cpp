@@ -44,23 +44,28 @@ void BPTree::insert(int value) {
  * @return bool: true is value is removed, false otherwise
 */
 bool BPTree::remove(int value) {
-    switch(depth) {
-        case 0:
-            if(root->values.size() != 0) {
-                for(int i = 0; i < root->values.size(); ++i) {
-                    if(value == root->values[i]) {
-                        root->values.erase(root->values.begin()+i);
-                        return 1;
-                    }
+    std::stack<Node*> ancestors;
+    Node* copy = root;
+    int current_depth = depth;
+
+    for(int i = 0; i <= current_depth; ++i) {
+        if(i == current_depth) {
+            std::vector<int>::iterator it = std::find(copy->values.begin(), copy->values.end(), value);
+            if(it != copy->values.end()) {
+                int position = std::distance(copy->values.begin(), it);
+                copy->values.erase(copy->values.begin() + position);
+                if(copy->values.size() < (degree)) { merge(copy, ancestors, true); }
+            } else { return 0; }
+        } else {
+            if(copy->values.size() > 0) {
+                ancestors.push(copy);
+                for(int j = copy->values.size() - 1; j >= 0 ; --j) {
+                    if(value > copy->values[j]) { copy = copy->children[j+1]; }
                 }
+                if(value < copy->values[0]) { copy = copy->children[0]; }
             }
-
-            break;
-        default:
-            break;
+        }
     }
-
-    return 0;
 }
 
 /** Checks if value exists in B+ Tree
@@ -170,4 +175,8 @@ void BPTree::split(Node* node, std::stack<Node*> ancestors, bool leaf) {
     }
 
     if(parent->values.size() > order - 1) { split(parent, ancestors, false); }
+}
+
+void BPTree::merge(Node* node, std::stack<Node*> ancestors, bool leaf) {
+
 }

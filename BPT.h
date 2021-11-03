@@ -18,4 +18,5 @@ class BPTree {
         unsigned int degree = 1;
         int depth = 0;
         void split(Node* node, std::stack<Node*> ancestors, bool leaf);
+        void merge(Node* node, std::stack<Node*> ancestors, bool leaf);
 };
