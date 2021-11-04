@@ -60,7 +60,7 @@ bool BPTree::remove(int value) {
             if(copy->values.size() > 0) {
                 ancestors.push(copy);
                 for(int j = copy->values.size() - 1; j >= 0 ; --j) {
-                    if(value > copy->values[j]) { copy = copy->children[j+1]; }
+                    if(value >= copy->values[j]) { copy = copy->children[j+1]; }
                 }
                 if(value < copy->values[0]) { copy = copy->children[0]; }
             }
